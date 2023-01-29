@@ -5,26 +5,14 @@ import { createEveryNTimer, initializeWorld } from '../modules/three-helpers';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { GlitchPass } from 'three/examples/jsm/postprocessing/GlitchPass';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
+import { useThreeJsScene } from '../modules/three-helpers-react/use-three-js-scene';
 
 
 // Main React Component
 export const Demo004 = () => {
   const canvasNodeRef = useRef<HTMLCanvasElement>(null);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [debugJSON, setDebugJSON] = useState({});
-  useEffect(() => {
-    (async () => {
-      const canvasNode = canvasNodeRef.current;
-      if (!canvasNode) return;
-      try {
-        const cleanup = await main(canvasNode, setDebugJSON);
-        return cleanup;
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Open console!';
-        setErrorMessage(errorMessage);
-      }
-    })();
-  }, []);
+  const { debugJSON, errorMessage } = useThreeJsScene(canvasNodeRef, main);
+
   return (
     <>
       <header>
@@ -44,9 +32,9 @@ const main = async (canvas: HTMLCanvasElement, setDebugJSON: (json: object) => v
   // ===============================================
   //     Global Settings
   // ===============================================
-  const { scene, camera, gui, grid, composer, renderComposer } = initializeWorld(canvas);
-  camera.position.z = 80;
-  camera.position.x = 1;
+  const { scene, camera, gui, grid, composer, renderComposer, subscribeRaf } = initializeWorld(canvas);
+  camera.position.z = 10;
+  camera.position.x = 0;
   camera.position.y = 0;
   camera.rotation.x = -26;
   camera.rotation.y = -2;
@@ -147,14 +135,21 @@ const main = async (canvas: HTMLCanvasElement, setDebugJSON: (json: object) => v
   //     Objects
   // ===============================================
 
+  const PI = Math.PI;
+
   //Object - Ground;
-  const groundMesh = new THREE.Mesh(
+  const theBoxGroup = new THREE.Group();
+  theBoxGroup.rotation.x = PI / 2;
+  theBoxGroup.position.z = 0;
+  scene.add(theBoxGroup);
+
+  const box = new THREE.Mesh(
     new THREE.BoxGeometry(8, 0.5, 8),
     new THREE.MeshPhongMaterial({ color: 0xfffffa }),
   );
-  groundMesh.receiveShadow = true;
-  groundMesh.position.y = groundMesh.geometry.parameters.height * 0.5 * -1;
-  scene.add(groundMesh);
+  box.receiveShadow = true;
+  box.position.y = box.geometry.parameters.height * 0.5 * -1;
+  theBoxGroup.add(box);
 
   // Object - Origin Cube
   // const cuboOrigin = new THREE.Mesh(
@@ -193,19 +188,17 @@ const main = async (canvas: HTMLCanvasElement, setDebugJSON: (json: object) => v
   //     Render
   // ===============================================
 
-  const animate = () => {
+  const unsubscribeRaf = subscribeRaf(() => {
     //   // Debug in React View
     //   setDebugJSON({});
     //
-    groundMesh.rotation.y += 0.01;
-    window.requestAnimationFrame(animate);
+    box.rotation.y += 0.01;
+    //
     renderComposer();
-  };
-  animate();
+  });
 
   // return cleanup function 
   return () => {
-    gui.destroy();
+    unsubscribeRaf();
   };
-
 };

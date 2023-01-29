@@ -17,7 +17,7 @@ export const initializeWorld = (canvas: HTMLCanvasElement) => {
   const sizes = getCanvasSizes(canvas);
 
   // Renderer
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  let renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.toneMapping = [
@@ -32,7 +32,7 @@ export const initializeWorld = (canvas: HTMLCanvasElement) => {
   // renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   // Renderer - Composer
-  const composer = new EffectComposer(renderer);
+  let composer = new EffectComposer(renderer);
 
 
   // Stats
@@ -44,25 +44,25 @@ export const initializeWorld = (canvas: HTMLCanvasElement) => {
   gui = new GUI();
 
   // Scene
-  const scene = new THREE.Scene();
+  let scene = new THREE.Scene();
 
   // Camera
-  const camera = new THREE.PerspectiveCamera(50, sizes.aspectRatio, 1, 1000);
+  let camera = new THREE.PerspectiveCamera(50, sizes.aspectRatio, 1, 1000);
   camera.position.set(0, 1.5, 5);
 
   // Orbit Control
-  const orbit = new OrbitControls(camera, renderer.domElement);
+  let orbit = new OrbitControls(camera, renderer.domElement);
   orbit.update(); // controls.update() must be called after any manual changes to the camera's transform
 
   // Clock
-  const clock = new THREE.Clock();
+  let clock = new THREE.Clock();
 
   // Grid 
-  const grid = new THREE.GridHelper();
+  let grid = new THREE.GridHelper();
   scene.add(grid);
 
   // Axes
-  const axesHelper = new THREE.AxesHelper(8);
+  let axesHelper = new THREE.AxesHelper(8);
   scene.add(axesHelper);
 
   // Lights
@@ -107,8 +107,73 @@ export const initializeWorld = (canvas: HTMLCanvasElement) => {
     composer.render();
   };
 
-  return { scene, camera, clock, gui, grid, axesHelper, renderer, composer, renderRenderer, renderComposer };
+  const subscribeRaf = (everyFrameCallback: () => void) => {
+    let rafRef: ReturnType<typeof window.requestAnimationFrame>;
+    const animate = () => {
+      everyFrameCallback();
+      rafRef = window.requestAnimationFrame(animate);
+    };
 
+    // play first frame
+    window.requestAnimationFrame(animate);
+
+    // destroy every thing
+    const unsubscribe = () => {
+      // clean window render frame loop
+      window.cancelAnimationFrame(rafRef);
+      // clean every object of the scene
+      disposeSceneByTraversing(scene);
+      renderer.dispose();
+      composer.dispose();
+      orbit.dispose();
+      grid.dispose();
+      axesHelper.dispose();
+      renderer.renderLists.dispose();
+      renderer = null as any;
+      composer = null as any;
+      orbit = null as any;
+      grid = null as any;
+      axesHelper = null as any;
+      scene = null as any;
+      camera = null as any;
+    };
+    return unsubscribe;
+  };
+
+  return { scene, camera, clock, gui, grid, axesHelper, renderer, composer, renderRenderer, renderComposer, subscribeRaf };
+
+};
+
+const disposeSceneByTraversing = (scene: THREE.Scene) => {
+  // travers scene and destroy every Geometry and MAterial and Texture
+  scene.traverse((object: any) => {
+    //if (object instanceof THREE.Mesh) {
+    console.log('dispose geometry!');
+    object.geometry?.dispose?.();
+
+    console.log('dispose material!');
+    if (object.material) {
+      if (Array.isArray(object.material)) {
+        for (const material of object.material) cleanMaterial(material);
+      } else {
+        cleanMaterial(object.material);
+      }
+    }
+  });
+
+  function cleanMaterial(material: THREE.Material) {
+    console.log('dispose material!');
+    material.dispose();
+
+    // dispose textures
+    for (const key in material) {
+      const value = material[key];
+      if (value && typeof value === 'object' && 'minFilter' in value) {
+        console.log('dispose texture!');
+        value.dispose();
+      }
+    }
+  };
 };
 
 

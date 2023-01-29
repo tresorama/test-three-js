@@ -8,26 +8,13 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { FilmShader } from 'three/examples/jsm/shaders/FilmShader';
 import { StaticShader } from '../modules/three-helpers/shaders/StaticShader';
+import { useThreeJsScene } from '../modules/three-helpers-react/use-three-js-scene';
 
 
 // Main React Component
 export const Demo006 = () => {
   const canvasNodeRef = useRef<HTMLCanvasElement>(null);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [debugJSON, setDebugJSON] = useState({});
-  useEffect(() => {
-    (async () => {
-      const canvasNode = canvasNodeRef.current;
-      if (!canvasNode) return;
-      try {
-        const cleanup = await main(canvasNode, setDebugJSON);
-        return cleanup;
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Open console!';
-        setErrorMessage(errorMessage);
-      }
-    })();
-  }, []);
+  const { debugJSON, errorMessage } = useThreeJsScene(canvasNodeRef, main);
   return (
     <>
       <header>
@@ -62,7 +49,7 @@ const main = async (canvas: HTMLCanvasElement, setDebugJSON: (json: object) => v
   // ===============================================
   //     Global Settings
   // ===============================================
-  const { scene, camera, gui, grid, clock, axesHelper, composer, renderComposer } = initializeWorld(canvas);
+  const { scene, camera, gui, grid, clock, axesHelper, composer, renderComposer, subscribeRaf } = initializeWorld(canvas);
   camera.position.z = 80;
   camera.position.x = 1;
   camera.position.y = 0;
@@ -252,21 +239,20 @@ const main = async (canvas: HTMLCanvasElement, setDebugJSON: (json: object) => v
   //     Render
   // ===============================================
 
-  const animate = () => {
+  const unsubscribeRaf = subscribeRaf(() => {
     const shaderTime = clock.getElapsedTime();
     filmPass.uniforms['time'].value = shaderTime;
     staticPass.uniforms['time'].value = shaderTime;
 
-    window.requestAnimationFrame(animate);
-    renderComposer();
     // Debug in React View
     // setDebugJSON();
-  };
-  animate();
+    //
+    renderComposer();
+  });
 
   // return cleanup function 
   return () => {
-    gui.destroy();
+    unsubscribeRaf();
   };
 
 };

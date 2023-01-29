@@ -2,29 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { createEveryNTimer, initializeWorld } from '../modules/three-helpers';
+import { useThreeJsScene } from '../modules/three-helpers-react/use-three-js-scene';
 
 // Main React Component
 export const Demo001 = () => {
   const canvasNodeRef = useRef<HTMLCanvasElement>(null);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [debugJSON, setDebugJSON] = useState({});
-  useEffect(() => {
-    (async () => {
-      const canvasNode = canvasNodeRef.current;
-      if (!canvasNode) return;
-      try {
-        const cleanup = await main(canvasNode, setDebugJSON);
-        return cleanup;
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Open console!';
-        setErrorMessage(errorMessage);
-      }
-    })();
-  }, []);
+  const { debugJSON, errorMessage } = useThreeJsScene(canvasNodeRef, main);
+
   return (
     <>
       <header>
-        <h1>Yo</h1>
+        <h1>Demo001</h1>
       </header>
       <canvas ref={canvasNodeRef} id="three-js-canvas" />
       <footer>
@@ -40,7 +28,7 @@ const main = async (canvas: HTMLCanvasElement, setDebugJSON: (json: object) => v
   // ===============================================
   //     Global Settings
   // ===============================================
-  const { scene, camera, clock, gui, setRenderFrameCallback } = initializeWorld(canvas);
+  const { scene, camera, clock, gui, renderRenderer, subscribeRaf } = initializeWorld(canvas);
   scene.background = new THREE.Color(0x333);
   camera.position.z = 8;
   camera.position.x = 1;
@@ -151,7 +139,7 @@ const main = async (canvas: HTMLCanvasElement, setDebugJSON: (json: object) => v
   // ===============================================
   //     Render
   // ===============================================
-  setRenderFrameCallback(() => {
+  const unsubscribeRaf = subscribeRaf(() => {
     // const pendoloValue = Math.sin(clock.getElapsedTime()) * 0.5 + 0.5;
     // meshLabel.setText(pendoloValue.toFixed(2));
 
@@ -169,17 +157,14 @@ const main = async (canvas: HTMLCanvasElement, setDebugJSON: (json: object) => v
     setDebugJSON({
       "clock.elapsedTime": clock.getElapsedTime(),
     });
-
+    //
+    renderRenderer();
   });
+
 
   // return cleanup function 
   return () => {
-    gui.destroy();
+    unsubscribeRaf();
   };
 
 };
-
-// Utils
-
-
-

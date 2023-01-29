@@ -5,26 +5,13 @@ import { createEveryNTimer, initializeWorld } from '../modules/three-helpers';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { GlitchPass } from 'three/examples/jsm/postprocessing/GlitchPass';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
-
+import { useThreeJsScene } from '../modules/three-helpers-react/use-three-js-scene';
 
 // Main React Component
 export const Demo005 = () => {
   const canvasNodeRef = useRef<HTMLCanvasElement>(null);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [debugJSON, setDebugJSON] = useState({});
-  useEffect(() => {
-    (async () => {
-      const canvasNode = canvasNodeRef.current;
-      if (!canvasNode) return;
-      try {
-        const cleanup = await main(canvasNode, setDebugJSON);
-        return cleanup;
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Open console!';
-        setErrorMessage(errorMessage);
-      }
-    })();
-  }, []);
+  const { debugJSON, errorMessage } = useThreeJsScene(canvasNodeRef, main);
+
   return (
     <>
       <header>
@@ -44,7 +31,7 @@ const main = async (canvas: HTMLCanvasElement, setDebugJSON: (json: object) => v
   // ===============================================
   //     Global Settings
   // ===============================================
-  const { scene, camera, gui, grid, clock, axesHelper, composer, renderComposer } = initializeWorld(canvas);
+  const { scene, camera, gui, grid, clock, axesHelper, composer, renderComposer, subscribeRaf } = initializeWorld(canvas);
   camera.position.z = 80;
   camera.position.x = 1;
   camera.position.y = 0;
@@ -209,19 +196,17 @@ const main = async (canvas: HTMLCanvasElement, setDebugJSON: (json: object) => v
   //     Render
   // ===============================================
 
-  const animate = () => {
-    videoMesh.rotation.y = 1 * Math.sin(clock.getElapsedTime() / 2);
-
-    window.requestAnimationFrame(animate);
-    renderComposer();
+  const unsubscribeRaf = subscribeRaf(() => {
     // Debug in React View
     // setDebugJSON();
-  };
-  animate();
+    videoMesh.rotation.y = 1 * Math.sin(clock.getElapsedTime() / 2);
+    //
+    renderComposer();
+  });
 
   // return cleanup function 
   return () => {
-    gui.destroy();
+    unsubscribeRaf();
   };
 
 };

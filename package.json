@@ -12,7 +12,8 @@
     "dat.gui": "^0.7.9",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "three": "^0.148.0"
+    "three": "^0.148.0",
+    "use-query-params": "^2.1.2"
   },
   "devDependencies": {
     "@types/dat.gui": "^0.7.7",
