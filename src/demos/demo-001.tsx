@@ -120,7 +120,7 @@ const main = async (canvas: HTMLCanvasElement, setDebugJSON: (json: object) => v
 
   // Object - Car
   const car = await new GLTFLoader()
-    .loadAsync("/assets/130/scene.gltf")
+    .loadAsync("/demos/demo-001/models/130/scene.gltf")
     .then(gltf => gltf.scene);
   scene.add(car);
   car.position.x = -1;
@@ -129,7 +129,7 @@ const main = async (canvas: HTMLCanvasElement, setDebugJSON: (json: object) => v
 
   // Object - Dog
   const dog = await new GLTFLoader()
-    .loadAsync("/assets/shiba/scene.gltf")
+    .loadAsync("/demos/demo-001/models/shiba/scene.gltf")
     .then(gltf => gltf.scene);
   // scene.add(dog);
   dog.position.x = 1;

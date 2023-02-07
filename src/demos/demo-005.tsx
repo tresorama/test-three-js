@@ -143,7 +143,7 @@ const main = async (canvas: HTMLCanvasElement, setDebugJSON: (json: object) => v
     // document.body.appendChild(video);
     video.loop = true;
     video.muted = true;
-    video.src = 'assets/videos/fits.mp4';
+    video.src = 'demos/demo-005/videos/fits.mp4';
     video.play();
 
     //init video texture

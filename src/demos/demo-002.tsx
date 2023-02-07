@@ -177,7 +177,7 @@ const main = async (canvas: HTMLCanvasElement, setDebugJSON: (json: object) => v
 
   // Object - Dog
   const dog = await new GLTFLoader()
-    .loadAsync("/assets/shiba/scene.gltf")
+    .loadAsync("/demos/demo-002/models/shiba/scene.gltf")
     .then(gltf => gltf.scene);
   dog.position.x = 1;
   dog.position.y = 2;

@@ -1,12 +1,14 @@
 import { useState } from 'react';
+import { WindowHistoryAdapter } from 'use-query-params/adapters/window';
+import { NumberParam, QueryParamProvider, useQueryParam } from 'use-query-params';
 import { Demo001 } from './demos/demo-001';
 import { Demo002 } from './demos/demo-002';
 import { Demo003 } from './demos/demo-003';
 import { Demo004 } from './demos/demo-004';
 import { Demo005 } from './demos/demo-005';
 import { Demo006 } from './demos/demo-006';
-import { WindowHistoryAdapter } from 'use-query-params/adapters/window';
-import { NumberParam, QueryParamProvider, useQueryParam } from 'use-query-params';
+import { Demo007 } from './demos/demo-007';
+import { Demo008 } from './demos/demo-008';
 
 
 /**
@@ -14,13 +16,16 @@ import { NumberParam, QueryParamProvider, useQueryParam } from 'use-query-params
  * wrapNumber(10, 25, 11); // 11
  * wrapNumber(10, 25, 10); // 10
  * wrapNumber(10, 25, 9); // 25
- * wrapNumber(10, 25, 24); // 24
- * wrapNumber(10, 25, 25); // 25
- * wrapNumber(10, 25, 26); // 10
  */
 const wrapNumber = (min: number, max: number, num: number) => {
   return ((((num - min) % (max - min)) + (max - min)) % (max - min)) + min;
 };
+
+export const App = () => (
+  <QueryParamProvider adapter={WindowHistoryAdapter}>
+    <Nested />
+  </QueryParamProvider>
+);
 
 const Demos = [
   Demo001,
@@ -29,14 +34,9 @@ const Demos = [
   Demo004,
   Demo005,
   Demo006,
+  Demo007,
+  Demo008,
 ];
-
-export const App = () => (
-  <QueryParamProvider adapter={WindowHistoryAdapter}>
-    <Nested />
-  </QueryParamProvider>
-);
-
 
 const useDemoIndex = () => {
   // Store demo index in URL query params
@@ -49,12 +49,12 @@ const useDemoIndex = () => {
   const [demoIndexParam, setDemoIndexParam] = useQueryParam('demo-index', NumberParam);
   const demoIndex = demoIndexParam ?? 0;
   const goPrevDemo = () => {
-    const newIndex = wrapNumber(0, Demos.length - 1, demoIndex - 1);
+    const newIndex = wrapNumber(0, Demos.length, demoIndex - 1);
     setDemoIndexParam(newIndex);
     window.location.reload();
   };
   const goNextDemo = () => {
-    const newIndex = wrapNumber(0, Demos.length - 1, demoIndex + 1);
+    const newIndex = wrapNumber(0, Demos.length, demoIndex + 1);
     setDemoIndexParam(newIndex);
     window.location.reload();
   };
@@ -67,6 +67,22 @@ const useDemoIndex = () => {
 
 };
 
+const DemoSwitcher = ({ demoIndex, goPrevDemo, goNextDemo }: ReturnType<typeof useDemoIndex>) => {
+  const [isOpen, setIsOpen] = useState(true);
+  const toggleIsOpen = () => setIsOpen(prev => !prev);
+
+  return (
+    <div className={`demo-switcher ${isOpen ? 'is-open' : ''}`}>
+      <div className="toggler" onClick={toggleIsOpen}>👈</div>
+      <span className='demo-title'>Demo - {demoIndex + 1}</span>
+      <div className='controls'>
+        <button type="button" onClick={goPrevDemo}>{"<"}</button>
+        <button type="button" onClick={goNextDemo}>{">"}</button>
+      </div>
+    </div>
+  );
+};
+
 const Nested = () => {
   const { demoIndex, goPrevDemo, goNextDemo } = useDemoIndex();
   const DemoComponent = Demos[demoIndex];
@@ -74,10 +90,11 @@ const Nested = () => {
   return (
     <div className='page'>
       <DemoComponent />
-      <div className='demo-switcher'>
-        <button type="button" onClick={goPrevDemo}>{"<"}</button>
-        <button type="button" onClick={goNextDemo}>{">"}</button>
-      </div >
+      <DemoSwitcher
+        demoIndex={demoIndex}
+        goPrevDemo={goPrevDemo}
+        goNextDemo={goNextDemo}
+      />
     </div >
   );
 };
