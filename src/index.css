@@ -21,6 +21,7 @@ html,body, #root {
   gap: .5rem;
   padding: 1rem 0.5rem;
   border: 4px solid;
+  background: hsl(0deg, 10%, 50%);
   transform: translateX(-95%);
 }
 .demo-switcher.is-open{

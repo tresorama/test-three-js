@@ -9,6 +9,9 @@ import { Demo005 } from './demos/demo-005';
 import { Demo006 } from './demos/demo-006';
 import { Demo007 } from './demos/demo-007';
 import { Demo008 } from './demos/demo-008';
+import { Demo009 } from './demos/demo-009';
+import { Demo010 } from './demos/demo-010';
+import { Demo011 } from './demos/demo-011';
 
 
 /**
@@ -36,6 +39,9 @@ const Demos = [
   Demo006,
   Demo007,
   Demo008,
+  Demo009,
+  Demo010,
+  Demo011,
 ];
 
 const useDemoIndex = () => {
