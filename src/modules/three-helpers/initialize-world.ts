@@ -167,6 +167,7 @@ const disposeSceneByTraversing = (scene: THREE.Scene) => {
 
     // dispose textures
     for (const key in material) {
+      // @ts-ignore
       const value = material[key];
       if (value && typeof value === 'object' && 'minFilter' in value) {
         console.log('dispose texture!');

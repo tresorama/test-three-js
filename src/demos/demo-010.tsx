@@ -207,6 +207,7 @@ async function main(canvas: HTMLCanvasElement, setDebugJSON: (json: any) => void
         const position = {
           x: geometry.attributes.position.array[i * 3]
         };
+        // @ts-ignore
         geometry.attributes.position.array[i * 3 + 1] = Math.sin(time + position.x * 3);
       }
       geometry.attributes.position.needsUpdate = true;

@@ -157,6 +157,7 @@ async function main(canvas: HTMLCanvasElement, setDebugJSON: (json: any) => void
         console.log(distanceFromCenter);
       }
       const h = smoothstep(0, 20, Math.abs(distanceFromCenter));
+      // @ts-ignore
       geometry.attributes.position.array[i + 2] = h * 20;
     }
 
