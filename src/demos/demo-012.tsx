@@ -16,8 +16,10 @@ export const Demo012 = () => {
       <style>{`
       #root,
       .page {
+        /*
         height: initial;
         display: initial;
+      */
       }
       .canvas-container {
         z-index: 1;
@@ -29,15 +31,11 @@ export const Demo012 = () => {
       }
 
       .page-content {
-        position: relative;
         z-index: 2;
-      }
-
-      .section {
+        position: relative;
         width: 100%;
-        height: 100vh;
-        display: flex;
-        outline: 3px solid rebeccapurple;
+        height: 100%;
+        pointer-events: none;
       }
 
       .demo-notes {
@@ -48,9 +46,37 @@ export const Demo012 = () => {
         color: white;
         font-size: 0.8rem;
       }
+
+      .section {
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        outline: 3px solid rebeccapurple;
+      }
+
+      .copy {
+        margin: auto 2vw;
+        font-size: 12vw;
+        font-weight: 400;
+        color: white;
+        font-family: Avenir;
+      }
+      .copy::first-letter {
+        text-transform: uppercase;
+        font-family: monospace;
+        font-size: 40vw;
+      }
       `}</style>
       <div className="canvas-container">
         <canvas ref={canvasNodeRef} />
+      </div>
+      <div className="page-content">
+        <div className="section">
+          <div className="copy">
+            Astra
+          </div>
+        </div>
       </div>
     </>
   );
@@ -156,7 +182,7 @@ async function main(canvas: HTMLCanvasElement, setDebugJSON: (json: any) => void
   };
 
   // Scene - Environment
-  camera.position.set(0, 1, 5);
+  camera.position.set(0, 1, 3);
   orbit.update();
   scene.background = new THREE.Color(COLORS.background);
   // scene.fog = new THREE.Fog(COLORS.background, 15, 20);
@@ -191,6 +217,10 @@ async function main(canvas: HTMLCanvasElement, setDebugJSON: (json: any) => void
     material.blending = THREE.AdditiveBlending;
 
     const points = new THREE.Points(geometry, material);
+
+    onFrame.subscribe(time => {
+      points.rotation.x = time * 1;
+    });
     return points;
   };
 
