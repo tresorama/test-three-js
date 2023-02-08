@@ -13,6 +13,7 @@ import { Demo009 } from './demos/demo-009';
 import { Demo010 } from './demos/demo-010';
 import { Demo011 } from './demos/demo-011';
 import { Demo012 } from './demos/demo-012';
+import { Demo013 } from './demos/demo-013';
 
 
 /**
@@ -44,6 +45,7 @@ const Demos = [
   Demo010,
   Demo011,
   Demo012,
+  Demo013,
 ];
 
 const useDemoIndex = () => {
