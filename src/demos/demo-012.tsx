@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { useThreeJsScene } from "../modules/three-helpers-react/use-three-js-scene";
 import { GUI } from 'dat.gui';
+import { getRandomInteger } from "../modules/math-helpers/random.integer";
 
 // singleton
 let gui = new GUI();
@@ -210,7 +211,16 @@ async function main(canvas: HTMLCanvasElement, setDebugJSON: (json: any) => void
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(verticesPositions, 3));
 
+    const texturesUrl = {
+      map: {
+        1: "demos/demo-012/particles/circle.png",
+        2: "demos/demo-012/particles/circle-2.png",
+        3: "demos/demo-012/particles/circle-3.png",
+      }[getRandomInteger(1, 3)]
+    };
+
     const material = new THREE.PointsMaterial();
+    material.map = new THREE.TextureLoader().load(texturesUrl.map!);
     material.size = 0.01;
     material.sizeAttenuation = true;
     material.depthWrite = false;
